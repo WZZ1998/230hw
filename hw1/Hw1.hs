@@ -19,9 +19,9 @@ import XMLTypes
 -- Tell us your name, email and student ID, by replacing the respective
 -- strings below
 
-myName  = "Write Your Name  Here"
-myEmail = "Write Your Email Here"
-mySID   = "Write Your SID   Here"
+myName  = "Kaiwen Sun"
+myEmail = "kas003@ucsd.edu"
+mySID   = "A53091621"
 
 -- Part 1: Defining and Manipulating Shapes
 -- ----------------------------------------
@@ -47,10 +47,10 @@ type Vertex = (Float, Float)
 --    built with the Polygon constructor.
 
 rectangle :: Side -> Side -> Shape
-rectangle w h = Polygon [(0,0),(0,h),(w,h),(w,0)]  --w:width, h:height, from origin, draw clockwise.
+rectangle w h = Polygon [(0,0),(0,h),(w,h),(w,0),(0,0)]  --w:width, h:height, from origin, draw clockwise.
 
 rtTriangle :: Side -> Side -> Shape
-rtTriangle w h = Polygon [(0,0),(0,h),(0,w)]  --w:width, h:height, the right angle is at origin on bottom left, draw clockwise.
+rtTriangle w h = Polygon [(0,0),(0,h),(0,w),(0,0)]  --w:width, h:height, the right angle is at origin on bottom left, draw clockwise.
 
 -- 2. Define a function
 
@@ -123,8 +123,52 @@ hanoi n a b c = do
 -- Write a function `sierpinskiCarpet` that displays this figure on the
 -- screen:
 
+minSize :: Int
+minSize = 5
+
+fillSqr :: Window -> Int -> Int -> Int -> IO ()
+fillSqr w x y size
+  = drawInWindow w (withColor Blue
+      (polygon [(x,y),(x+size,y),(x+size,y+size),(x,y+size)]))
+
+sierpinskiCarpetInner :: Window -> Int -> Int -> Int -> IO ()
+sierpinskiCarpetInner w x y size
+  = if size <= minSize
+    then fillSqr w x y size
+    else let size3 = (size-1) `div` 3
+      in do sierpinskiCarpetInner w x y size3
+            sierpinskiCarpetInner w (x+size3)     y         size3
+            sierpinskiCarpetInner w (x+size3*2)   y         size3
+            sierpinskiCarpetInner w x             (y+size3) size3
+            sierpinskiCarpetInner w (x+size3*2)   (y+size3) size3
+            sierpinskiCarpetInner w x             (y+size3*2) size3
+            sierpinskiCarpetInner w (x+size3)     (y+size3*2) size3
+            sierpinskiCarpetInner w (x+size3*2)   (y+size3*2) size3
+  
+
 sierpinskiCarpet :: IO ()
-sierpinskiCarpet = error "Define me!"
+sierpinskiCarpet
+  = runGraphics (
+    do w <- openWindow "Sierpinski's Carpet" (700,700)
+       sierpinskiCarpetInner w 1 1 (648)
+       spaceClose w
+    )
+
+{-
+sierpinskiCarpet
+    = runGraphics (
+    do w <- openWindow "TEST" (400,400)
+       drawInWindow w (withColor Blue (polygon [(50,50),(250,50),(250,250),(50,250),(50,50)]))
+       spaceClose w
+    )
+-}
+
+spaceClose :: Window -> IO ()
+spaceClose w
+  = do k <- getKey w
+       if k==' ' || k == '\x0'
+          then closeWindow w
+          else spaceClose w
 
 -- Note that you either need to run your program in `SOE/src` or add this
 -- path to GHC's search path via `-i/path/to/SOE/src/`.
@@ -135,8 +179,35 @@ sierpinskiCarpet = error "Define me!"
 --    own design.  Be creative!  The only constraint is that it shows some
 --    pattern of recursive self-similarity.
 
+
+fillParr :: Window -> Int -> Int -> Int -> IO ()
+fillParr w x y size
+  = drawInWindow w (withColor Blue
+      (polygon [(x,y),(x+size,y),(x+size*2,y+size),(x+size,y+size)]))
+
+myFractalInner :: Window -> Int -> Int -> Int -> IO ()
+myFractalInner w x y size
+  = if size <= minSize
+    then fillParr w x y size
+    else let size3 = (size-1) `div` 3
+      in do myFractalInner w x y size3
+            myFractalInner w (x+size3)     (y+(size3 `div` 4))    size3
+            myFractalInner w (x+size3*2)   y         size3
+            myFractalInner w (x+(size3 `div` 4))     (y+size3) size3
+            myFractalInner w (x+size3*3)   (y+size3) size3
+            myFractalInner w (x+size3*2)   (y+size3*2) size3
+            myFractalInner w (x+size3*3)     (y+size3*2) size3
+            myFractalInner w (x+size3*4)   (y+size3*2) size3
+  
+
 myFractal :: IO ()
-myFractal = error "Define me!"
+myFractal
+  = runGraphics (
+    do w <- openWindow "Sierpinski's Carpet" (1300,700)
+       myFractalInner w 1 1 (648)
+       spaceClose w
+    )
+  
 
 -- Part 3: Recursion Etc.
 -- ----------------------
