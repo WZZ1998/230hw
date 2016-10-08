@@ -220,60 +220,73 @@ myFractal
 -- Write a *non-recursive* function to compute the length of a list
 
 lengthNonRecursive :: [a] -> Int
-lengthNonRecursive = error "Define me!"
+lengthNonRecursive l = length l
 
 -- `doubleEach [1,20,300,4000]` should return `[2,40,600,8000]`
 
 doubleEach :: [Int] -> [Int]
-doubleEach = error "Define me!"
+doubleEach [] = []
+doubleEach lst = ((head lst) * 2):(doubleEach (tail lst))
 
 -- Now write a *non-recursive* version of the above.
 
 doubleEachNonRecursive :: [Int] -> [Int]
-doubleEachNonRecursive = error "Define me!"
+doubleEachNonRecursive lst = map (\e->e*2) lst
 
 -- `pairAndOne [1,20,300]` should return `[(1,2), (20,21), (300,301)]`
 
 pairAndOne :: [Int] -> [(Int, Int)]
-pairAndOne = error "Define me!"
+pairAndOne [] = []
+pairAndOne lst = ((first,first+1):(pairAndOne (tail lst)))
+                 where first = head lst
 
 
 -- Now write a *non-recursive* version of the above.
 
 pairAndOneNonRecursive :: [Int] -> [(Int, Int)]
-pairAndOneNonRecursive = error "Define me!"
+pairAndOneNonRecursive lst = map (\e->(e,e+1)) lst
 
 -- `addEachPair [(1,2), (20,21), (300,301)]` should return `[3,41,601]`
 
 addEachPair :: [(Int, Int)] -> [Int]
-addEachPair = error "Define me!"
+addEachPair [] = []
+addEachPair lst = ((fst first)+(snd first)):(addEachPair (tail lst))
+                  where first = head lst
 
 -- Now write a *non-recursive* version of the above.
 
 addEachPairNonRecursive :: [(Int, Int)] -> [Int]
-addEachPairNonRecursive = error "Define me!"
+addEachPairNonRecursive lst = map (\(a,b)->(a+b)) lst
 
 -- `minList` should return the *smallest* value in the list. You may assume the
 -- input list is *non-empty*.
 
 minList :: [Int] -> Int
-minList = error "Define me!"
+minList [a] = a
+minList (x:t) = if x<=r
+                then x
+                else r
+                where r = (minList t)
 
 -- Now write a *non-recursive* version of the above.
 
 minListNonRecursive :: [Int] -> Int
-minListNonRecursive = error "Define me!"
+minListNonRecursive lst = minimum lst
 
 -- `maxList` should return the *largest* value in the list. You may assume the
 -- input list is *non-empty*.
 
 maxList :: [Int] -> Int
-maxList = error "Define me!"
+maxList [a] = a
+maxList (x:t) = if x>=r
+                then x
+                else r
+                where r = (maxList t)
 
 -- Now write a *non-recursive* version of the above.
 
 maxListNonRecursive :: [Int] -> Int
-maxListNonRecursive = error "Define me!"
+maxListNonRecursive lst = maximum lst
 
 -- Now, a few functions for this `Tree` type.
 
@@ -284,19 +297,22 @@ data Tree a = Leaf a | Branch (Tree a) (Tree a)
 -- So: `fringe (Branch (Leaf 1) (Leaf 2))` should return `[1,2]`
 
 fringe :: Tree a -> [a]
-fringe = error "Define me!"
+fringe (Leaf a) = [a]
+fringe (Branch a b) = (fringe a) ++ (fringe b)
 
 -- `treeSize` should return the number of leaves in the tree.
 -- So: `treeSize (Branch (Leaf 1) (Leaf 2))` should return `2`.
 
 treeSize :: Tree a -> Int
-treeSize = error "Define me!"
+treeSize (Leaf a) = 1
+treeSize (Branch a b) = (treeSize a) + (treeSize b)
 
 -- `treeSize` should return the height of the tree.
 -- So: `height (Branch (Leaf 1) (Leaf 2))` should return `1`.
 
 treeHeight :: Tree a -> Int
-treeHeight = error "Define me!"
+treeHeight (Leaf a) = 0
+treeHeight (Branch a b) = 1 + (max (treeHeight a) (treeHeight b))
 
 -- Now, a tree where the values live at the nodes not the leaf.
 
