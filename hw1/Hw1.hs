@@ -324,19 +324,22 @@ data InternalTree a = ILeaf | IBranch a (InternalTree a) (InternalTree a)
 -- should return `IBranch 1 ILeaf ILeaf`.
 
 takeTree :: Int -> InternalTree a -> InternalTree a
-takeTree = error "Define me!"
+takeTree _ ILeaf = ILeaf
+takeTree 0 _ = ILeaf
+takeTree n (IBranch value b1 b2) = IBranch value (takeTree (n-1) b1) (takeTree (n-1) b2)
 
 -- `takeTreeWhile p t` should cut of the tree at the nodes that don't satisfy `p`.
 -- So: `takeTreeWhile (< 3) (IBranch 1 (IBranch 2 ILeaf ILeaf) (IBranch 3 ILeaf ILeaf)))`
 -- should return `(IBranch 1 (IBranch 2 ILeaf ILeaf) ILeaf)`.
 
 takeTreeWhile :: (a -> Bool) -> InternalTree a -> InternalTree a
-takeTreeWhile = error "Define me!"
+takeTreeWhile _ ILeaf = ILeaf
+takeTreeWhile p (IBranch v b1 b2) = if (p v) then (IBranch v (takeTreeWhile p b1) (takeTreeWhile p b2)) else ILeaf
 
 -- Write the function map in terms of foldr:
 
 myMap :: (a -> b) -> [a] -> [b]
-myMap = error "Define me!"
+myMap f lst = foldr (\x y->((f x):y)) ([]) lst
 
 -- Part 4: Transforming XML Documents
 -- ----------------------------------
@@ -427,8 +430,72 @@ myMap = error "Define me!"
 -- yields the HTML speciﬁed above (but with no whitespace except what's
 -- in the textual data in the original XML).
 
+accArray :: ElementName -> [SimpleXML] -> SimpleXML
+accArray tag xmlArray = Element tag (foldr (\ele arr -> ele:arr) [] xmlArray)
+
 formatPlay :: SimpleXML -> SimpleXML
-formatPlay xml = PCDATA "WRITE ME!"
+formatPlay xml = removeEmptyTag (formatXml 1 xml)
+{-
+formatPlay (Element "TITLE" xmlArray) = accArray "h1" (map formatPlay xmlArray)
+
+formatPlay (Element "PERSONAE" xmlArray) = Element "h2" [(PCDATA "Dramatis Personae")]):[(accArray "" (xmlArray))])
+formatPlay (PCDATA str) = (PCDATA str)
+
+
+formatPlay (Element tag xmlArray) = Element tag []
+formatPlay _ = Element "na" []
+-}
+
+emptyTag = ""
+noTag = "notag"
+
+getXmlTag :: SimpleXML -> ElementName
+getXmlTag (Element tag _) = tag
+getXmlTag (PCDATA _) = noTag
+
+getXmlArray :: SimpleXML -> [SimpleXML]
+getXmlArray (Element _ array) = array
+getXmlArray _ = error "getXmlArray"
+
+getData :: SimpleXML -> String
+getData (PCDATA str) = str
+getData _ = error "Can't get data from Element"
+
+reduceEptEle :: SimpleXML -> [SimpleXML] -> [SimpleXML]
+reduceEptEle h right =
+  if ((getXmlTag h)==emptyTag)
+  then ((foldr reduceEptEle [] (getXmlArray h))++(right))
+  else if ((getXmlTag h)==noTag)
+  then (h : right)
+  else ((removeEmptyTag h):(right))
+
+removeEmptyTag :: SimpleXML -> SimpleXML
+removeEmptyTag (Element tag array) = (Element tag (foldr reduceEptEle [] array))
+removeEmptyTag (PCDATA str) = PCDATA str
+
+
+getHeadNum :: Int -> ElementName
+getHeadNum n = case n of
+  1 -> "h1"
+  2 -> "h2"
+  3 -> "h3"
+  4 -> "h4"
+  5 -> "h5"
+  6 -> "h6"
+
+formatXml :: Int -> SimpleXML  -> SimpleXML
+formatXml _ (PCDATA str) = PCDATA str
+formatXml flag (Element tag array) = case tag of
+  "PLAY" -> Element "html" [Element "body" (map (formatXml flag) array)]
+  "TITLE" -> Element (getHeadNum flag) (map (formatXml (flag+1)) array)
+  "PERSONAE" -> Element emptyTag ((Element (getHeadNum (flag+1)) [(PCDATA "Dramatis Personae")]):(map (formatXml (flag+1)) array))
+  "PERSONA" -> PCDATA ((getData (head array))++"<br/>")
+  "ACT" -> Element emptyTag (map (formatXml (flag+1)) array) 
+  "SCENE" -> Element emptyTag (map (formatXml (flag+1)) array)
+  "SPEECH" -> Element emptyTag (map (formatXml flag) array)
+  "SPEAKER" -> PCDATA ("<b>"++(getData (head array))++"</b><br/>")
+  "LINE" -> PCDATA ((getData (head array))++"<br/>")
+  _ -> error ("No such tag "++tag)
 
 -- The main action that we've provided below will use your function to
 -- generate a ﬁle `dream.html` from the sample play. The contents of this
