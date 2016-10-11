@@ -47,10 +47,10 @@ type Vertex = (Float, Float)
 --    built with the Polygon constructor.
 
 rectangle :: Side -> Side -> Shape
-rectangle w h = Polygon [(0,0),(0,h),(w,h),(w,0),(0,0)]  --w:width, h:height, from origin, draw clockwise.
+rectangle w h = Polygon [(0,0),(0,h),(w,h),(w,0)]  --w:width, h:height, from origin, draw clockwise.
 
 rtTriangle :: Side -> Side -> Shape
-rtTriangle w h = Polygon [(0,0),(0,h),(0,w),(0,0)]  --w:width, h:height, the right angle is at origin on bottom left, draw clockwise.
+rtTriangle w h = Polygon [(0,0),(0,h),(0,w)]  --w:width, h:height, the right angle is at origin on bottom left, draw clockwise.
 
 -- 2. Define a function
 
@@ -58,7 +58,10 @@ sides :: Shape -> Int
 sides (Rectangle _ _) = 4
 sides (Ellipse _ _) = 42
 sides (RtTriangle _ _) = 3
-sides (Polygon ver) = length ver
+sides (Polygon ver) = if l<3
+                      then 0
+                      else l
+                      where l = length ver
 
 --   which returns the number of sides a given shape has.
 --   For the purposes of this exercise, an ellipse has 42 sides,
